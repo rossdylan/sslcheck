@@ -87,7 +87,12 @@ func IsExpired(then time.Time) bool {
 func GetExpireDays(then time.Time) int {
 	now := time.Now()
 	delta := then.Sub(now)
-	return int(delta.Hours() / 24)
+	days := int(delta.Hours() / 24)
+	if days < 0 {
+		return days
+	} else {
+		return days + 1
+	}
 }
 
 //Give a hostname and a port grab the certificate for the service
