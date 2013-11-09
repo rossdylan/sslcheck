@@ -23,32 +23,24 @@ func init() {
 func main() {
 	flag.Parse()
 	queue := make(chan *x509.Certificate, 10)
-	exitQueue := make(chan bool)
-	var numThreads int
-	numThreads = 0
+	var numCerts int
+	numCerts = 0
 	for _, arg := range os.Args[1:] {
 		if strings.Contains(arg, ":") {
-			go sclib.CertGrabber(arg, queue, exitQueue)
-			numThreads += 1
+			go sclib.CertGrabber(arg, queue)
+			numCerts += 1
 		}
 	}
 	var count int
 	count = 0
-	for val := range exitQueue {
-		if val {
-			count += 1
-		}
-		if count == numThreads {
-			break
-		}
-	}
-	queue <- nil
 	var certs sclib.Certificates
-	certs = make(sclib.Certificates, 0)
+	certs = make(sclib.Certificates, numCerts)
 	for cert := range queue {
 		if cert != nil {
-			certs = append(certs, cert)
-		} else {
+			certs[count] = cert
+			count++
+		}
+		if count == numCerts {
 			break
 		}
 	}

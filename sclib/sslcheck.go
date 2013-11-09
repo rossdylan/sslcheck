@@ -126,7 +126,7 @@ func GetCerts(host string, port int) *x509.Certificate {
 //Grab a certificate from the given uri and send it down a channel to be processed
 //Then report our exit to the main thread using another channel
 //This is intended to be run via a goroutine
-func CertGrabber(uri string, queue chan *x509.Certificate, exitQueue chan bool) {
+func CertGrabber(uri string, queue chan *x509.Certificate) {
 	hostSplit := strings.Split(uri, ":")
 	host := hostSplit[0]
 	port, err := strconv.Atoi(hostSplit[1])
@@ -134,6 +134,5 @@ func CertGrabber(uri string, queue chan *x509.Certificate, exitQueue chan bool) 
 		panic(err)
 	}
 	queue <- GetCerts(host, port)
-	exitQueue <- true
 
 }
