@@ -93,6 +93,7 @@ func GetExpireDays(then time.Time) int {
 	} else {
 		return days + 1
 	}
+	return 0
 }
 
 //Give a hostname and a port grab the certificate for the service
