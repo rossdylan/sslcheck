@@ -129,7 +129,3 @@ func CertGrabber(uri string, queue chan *x509.Certificate, exitQueue chan bool) 
 	exitQueue <- true
 
 }
-
-//Main function, sets up all the channels needed for communication
-//and grabs the uris to parse out of the arguments. We also monitor
-//a channel to make sure all our workers die

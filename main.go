@@ -7,6 +7,9 @@ import (
 	"os"
 )
 
+//Main function, sets up all the channels needed for communication
+//and grabs the uris to parse out of the arguments. We also monitor
+//a channel to make sure all our workers die
 func main() {
 	queue := make(chan *x509.Certificate, 10)
 	exitQueue := make(chan bool)
