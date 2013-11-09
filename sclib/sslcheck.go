@@ -49,7 +49,7 @@ func MailReport(report, to_addr string) {
 
 //Given a Certificates list, create a tabular report of
 //the relevant information in string format
-func GenerateReport(certs Certificates) string {
+func GenerateReport(certs Certificates, warningsOnly bool) string {
 	sort.Sort(certs)
 	pReader, pWriter := io.Pipe()
 	var buff bytes.Buffer
@@ -67,7 +67,9 @@ func GenerateReport(certs Certificates) string {
 			}
 			daysToExpire := GetExpireDays(eDate)
 			cn := cert.Subject.CommonName
-			fmt.Fprintf(reportWriter, "%s\t%s\t   \t%d\t%s\n", cn, expired, daysToExpire, eDate.Local())
+			if (warningsOnly && IsExpired(eDate)) || !warningsOnly {
+				fmt.Fprintf(reportWriter, "%s\t%s\t   \t%d\t%s\n", cn, expired, daysToExpire, eDate.Local())
+			}
 		}
 	}
 	go buff.ReadFrom(pReader)
