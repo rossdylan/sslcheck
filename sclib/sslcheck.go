@@ -56,12 +56,14 @@ func GenerateReport(certs Certificates, warningsOnly bool) string {
 	reportWriter := new(tabwriter.Writer)
 	reportWriter.Init(pWriter, 0, 8, 0, '\t', 0)
 	fmt.Fprintln(reportWriter, "Site\tStatus\t   \tDays Left\tExpire Date")
+	expiredCount := 0
 	for _, cert := range certs {
 		if cert != nil {
 			eDate := cert.NotAfter
 			var expired string
 			if IsExpired(eDate) {
 				expired = "Expired"
+				expiredCount++
 			} else {
 				expired = "Valid"
 			}
@@ -71,6 +73,9 @@ func GenerateReport(certs Certificates, warningsOnly bool) string {
 				fmt.Fprintf(reportWriter, "%s\t%s\t   \t%d\t%s\n", cn, expired, daysToExpire, eDate.Local())
 			}
 		}
+	}
+	if expiredCount == 0 && warningsOnly {
+		return ""
 	}
 	go buff.ReadFrom(pReader)
 	reportWriter.Flush()

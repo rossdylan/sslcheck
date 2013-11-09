@@ -31,6 +31,10 @@ func main() {
 			numCerts += 1
 		}
 	}
+	if numCerts == 0 {
+		fmt.Println("Enter at least 1 service")
+		return
+	}
 	var count int
 	count = 0
 	var certs sclib.Certificates
@@ -47,6 +51,9 @@ func main() {
 	var report string
 	report = sclib.GenerateReport(certs, warning)
 	if email != "" {
+		if report == "" {
+			return
+		}
 		sclib.MailReport(report, email)
 	} else {
 		fmt.Println(report)
