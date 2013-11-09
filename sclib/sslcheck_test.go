@@ -21,3 +21,31 @@ func Test_IsExpiredFalse(t *testing.T) {
 		t.Error("Unexpired time reported as expired")
 	}
 }
+
+func Test_GetExpiredDays(t *testing.T) {
+	nowTime := time.Now()
+	futureTime := nowTime.AddDate(0, 0, 1)
+	days := GetExpireDays(futureTime)
+	if days != 1 {
+		t.Error("Expired day count: ", days, " != 1")
+	}
+	otherTime := nowTime.AddDate(0, 0, 10)
+	otherDays := GetExpireDays(otherTime)
+	if otherDays != 10 {
+		t.Error("Expired day count: ", otherDays, " != 10")
+	}
+}
+
+func Test_GetExpiredDaysNeg(t *testing.T) {
+	nowTime := time.Now()
+	futureTime := nowTime.AddDate(0, 0, -1)
+	days := GetExpireDays(futureTime)
+	if days != -1 {
+		t.Error("Expired day count: ", days, " != -1")
+	}
+	otherTime := nowTime.AddDate(0, 0, -10)
+	otherDays := GetExpireDays(otherTime)
+	if otherDays != -10 {
+		t.Error("Expired day count: ", otherDays, " != -10")
+	}
+}
