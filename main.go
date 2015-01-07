@@ -7,6 +7,7 @@ import (
 	"github.com/rossdylan/sslcheck/sclib"
 	"os"
 	"strings"
+	"path/filepath"
 )
 
 var email string
@@ -21,6 +22,11 @@ func init() {
 //and grabs the uris to parse out of the arguments. We also monitor
 //a channel to make sure all our workers die
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [options] [host:port ...]\n", filepath.Base(os.Args[0]))
+		fmt.Println("\nOptions:")
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 	queue := make(chan *x509.Certificate, 10)
 	var numCerts int
