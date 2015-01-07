@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/x509"
 	"flag"
 	"fmt"
 	"github.com/rossdylan/sslcheck/sclib"
@@ -35,7 +34,7 @@ func main() {
 		flag.PrintDefaults()
 	}
 	flag.Parse()
-	queue := make(chan *x509.Certificate, 10)
+	queue := make(chan *sclib.CertificateInfo, 10)
 	var numCerts int
 	numCerts = 0
 
@@ -87,8 +86,8 @@ func main() {
 	}
 	var count int
 	count = 0
-	var certs sclib.Certificates
-	certs = make(sclib.Certificates, numCerts)
+	var certs sclib.CertificateInfoList
+	certs = make(sclib.CertificateInfoList, numCerts)
 	for cert := range queue {
 		if cert != nil {
 			certs[count] = cert

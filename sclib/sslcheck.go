@@ -16,25 +16,29 @@ import (
 	"time"
 )
 
-//Alias []*x509.Certificate to Certificates
-type Certificates []*x509.Certificate
+type CertificateInfoList []*CertificateInfo
 
-//The Len function for Certificates
+type CertificateInfo struct {
+	name string
+	cert *x509.Certificate
+}
+
+//The Len function for CertificateInfoList
 //used as part of the implementation of sort.Interface
-func (c Certificates) Len() int {
+func (c CertificateInfoList) Len() int {
 	return len(c)
 }
 
-//Swap 2 elements in a Certificates type
+//Swap 2 elements in a CertificateInfoList type
 //used as part of the implementation of sort.Interface
-func (c Certificates) Swap(i, j int) {
+func (c CertificateInfoList) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 
-//Calculate the order of 2 certificates in a Certificates list
+//Calculate the order of 2 CertificateInfoList in a CertificateInfoList list
 //used as part of the implementation of sort.Interface
-func (c Certificates) Less(i, j int) bool {
-	return c[i].Subject.CommonName < c[j].Subject.CommonName
+func (c CertificateInfoList) Less(i, j int) bool {
+	return c[i].name < c[j].name
 }
 
 //Give a report (just a string) and an adresss to send it to
@@ -49,17 +53,17 @@ func MailReport(report, to_addr string) {
 
 //Given a Certificates list, create a tabular report of
 //the relevant information in string format
-func GenerateReport(certs Certificates, warningsOnly bool) string {
+func GenerateReport(certs CertificateInfoList, warningsOnly bool) string {
 	sort.Sort(certs)
 	pReader, pWriter := io.Pipe()
 	var buff bytes.Buffer
 	reportWriter := new(tabwriter.Writer)
 	reportWriter.Init(pWriter, 0, 8, 0, '\t', 0)
-	fmt.Fprintln(reportWriter, "Site\tStatus\t   \tDays Left\tExpire Date")
+	fmt.Fprintln(reportWriter, "Site\tCommon Name\tStatus\t   \tDays Left\tExpire Date")
 	expiredCount := 0
 	for _, cert := range certs {
 		if cert != nil {
-			eDate := cert.NotAfter
+			eDate := cert.cert.NotAfter
 			var expired string
 			if IsExpired(eDate) {
 				expired = "Expired"
@@ -68,9 +72,9 @@ func GenerateReport(certs Certificates, warningsOnly bool) string {
 				expired = "Valid"
 			}
 			daysToExpire := GetExpireDays(eDate)
-			cn := cert.Subject.CommonName
+			cn := cert.cert.Subject.CommonName
 			if (warningsOnly && IsExpired(eDate)) || !warningsOnly {
-				fmt.Fprintf(reportWriter, "%s\t%s\t   \t%d\t%s\n", cn, expired, daysToExpire, eDate.Local())
+				fmt.Fprintf(reportWriter, "%s\t%s\t%s\t   \t%d\t%s\n", cert.name, cn, expired, daysToExpire, eDate.Local())
 			}
 		}
 	}
@@ -131,13 +135,13 @@ func GetCerts(host string, port int) *x509.Certificate {
 //Grab a certificate from the given uri and send it down a channel to be processed
 //Then report our exit to the main thread using another channel
 //This is intended to be run via a goroutine
-func CertGrabber(uri string, queue chan *x509.Certificate) {
+func CertGrabber(uri string, queue chan *CertificateInfo) {
 	hostSplit := strings.Split(uri, ":")
 	host := hostSplit[0]
 	port, err := strconv.Atoi(hostSplit[1])
 	if err != nil {
 		panic(err)
 	}
-	queue <- GetCerts(host, port)
+	queue <- &CertificateInfo{name: uri, cert: GetCerts(host, port)}
 
 }
