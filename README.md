@@ -12,4 +12,5 @@
 
 ```
     $ sslcheck csh.rit.edu:443 google.com:443
+    $ sslcheck -file sites.txt
 ```
